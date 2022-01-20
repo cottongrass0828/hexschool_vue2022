@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>產品列表</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+  <div id="app" class="container-fluid">
+    <table class="table table-hover mt-4">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">商品名稱</th>
+          <th scope="col">原價</th>
+          <th scope="col">售價</th>
+          <th scope="col">是否啟用</th>
+          <th scope="col">操作</th>
+        </tr>
+      </thead>
+      <tbody id="productList">
+        <tr v-for="(product,key,index) in products">
+          <td scope="row">
+            {{index+1}}
+          </td>
+          <td class=" col-4 text-truncate">
+            {{product.title}}
+          </td>
+          <td>
+            {{product.origin_price}}
+          </td>
+          <td>
+            {{product.price}}
+          </td>
+          <td v-if="product.is_enabled" class="text-success">
+            上架
+          </td>
+          <td v-else>下架</td>
+          <td>
+            <button type="button" class="btn btn-sm btn-outline-danger move deleteBtn mx-1" data-action="remove"
+              data-id="">
+              刪除 </button>
+            <button type="button" class="btn btn-sm btn-outline-primary" data-action="edit" data-id="">
+              編輯 </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>目前有 <span>{{Object.keys(products).length}}</span> 項產品</p>
+  </div>
+  <script src="https://unpkg.com/vue@next"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+  <script>
+    const url = 'https://vue3-course-api.hexschool.io/v2';
+    const path = 'piggystore';
+
+    Vue.createApp({
+      data() {
+        return {
+          products: [],
+        }
+      },
+      methods: {
+        checkLogin() {
+          const token = document.cookie.replace(/(?:(?:^|.*;\s*)piggyToken\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+          axios.defaults.headers.common['Authorization'] = token;
+          axios.post(`${url}/api/user/check`)
+            .then((res) => {
+              console.log(res);
+              this.getProductslist();
+            })
+            .catch((err) => {
+              console.dir(err);
+              alert('未正確登入，請重新登入再繼續！');
+              window.location.href = './login.html';
+            })
+        },
+        getProductslist() {
+          axios.get(`${url}/api/${path}/admin/products/all`)
+            .then((res) => {
+              console.log(res);
+              this.products = res.data.products
+            })
+            .catch((err) => {
+              console.dir(err.response);
+            })
+        }
+      },
+      mounted() {
+        this.checkLogin();
+      }
+    }).mount('#app');
+
+
+      //新增產品
+      // function addProduct() {
+      //   const product = {
+      //     data: {
+      //       title: '[賣]動物園造型衣服3',
+      //       category: '衣服2',
+      //       origin_price: 100,
+      //       price: 300,
+      //       unit: '個',
+      //       description: 'Sit down please 名設計師設計',
+      //       content: '這是內容',
+      //       is_enabled: 1,
+      //       imageUrl: 'https://images.unsplash.com/photo-1573662012516-5cb4399006e7?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1267&q=80'
+      //     }
+      //   }
+      //   axios.post(`${url}/api/${path}/admin/product`,product)
+      //     .then((res) => {
+      //       console.log(res);
+      //     })
+      //     .catch((err) => {
+      //       console.dir(err.response);
+      //     })
+      // }
+  </script>
+
+</body>
+
+</html>
